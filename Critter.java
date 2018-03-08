@@ -26,6 +26,7 @@ public abstract class Critter {
 	private	static List<Critter> population = new java.util.ArrayList<Critter>();
 	private static List<Critter> babies = new java.util.ArrayList<Critter>();
 	private static List<Critter> collection = new java.util.ArrayList<Critter>();
+	private static String[][] board = new String[Params.world_width][Params.world_height];
 
 	// Gets the package name.  This assumes that Critter and its subclasses are all in the same package.
 	static {
@@ -82,6 +83,7 @@ public abstract class Critter {
 		newCritter.x_coord = getRandomInt(Params.world_width);
 		newCritter.y_coord = getRandomInt(Params.world_height);
 		collection.add(newCritter);
+		board[newCritter.x_coord][newCritter.y_coord] = newCritter.toString();
 		}
 		catch(Exception e) {
 			throw new InvalidCritterException(critter_class_name);
@@ -200,6 +202,18 @@ public abstract class Critter {
 			if so: print their symbol
 			else: print an empty space
 		*/
+		for(int x = 0; x < Params.world_width; x++) {
+			System.out.print('|');
+			for(int y = 0; y < Params.world_height; y++) {
+				if(board[x][y] == null) {
+					System.out.print(' ');
+				}
+				else {
+					System.out.print(board[x][y]);
+				}
+			}
+			System.out.println('|');
+		}
 		//print bottom border
 		System.out.print("+");
 		for(int i = 0; i < Params.world_width; i++) {
