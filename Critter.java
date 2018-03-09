@@ -53,6 +53,40 @@ public abstract class Critter {
 	private int y_coord;
 	
 	protected final void walk(int direction) {
+		//this needs fixing so that the critter who walks has its coordinates updated
+		//Q5 in FAQ talks about it but it didn't really help me
+		//also view needs to be updated with coordinate changes
+		//Params.walk_energy_cost needs to be deducted from Critter's energy
+		switch(direction) {
+		//(1,0)
+		case 1: x_coord += 1;
+				break;
+		//(1,1)
+		case 2: x_coord += 1;
+				y_coord += 1;
+				break;
+		//(0,1)
+		case 3: y_coord += 1;
+				break;
+		//(-1,1)
+		case 4: x_coord -= 1;
+				y_coord += 1;
+				break;
+		//(-1,0)
+		case 5: x_coord -= 1;
+				break;
+		//(-1,-1)
+		case 6: x_coord -= 1;
+				y_coord -= 1;
+				break;
+		//(0,-1)
+		case 7:	y_coord -= 1;
+				break;
+		//(1,-1)
+		case 8: x_coord += 1;
+				y_coord -= 1;
+				break;
+		}
 	}
 	
 	protected final void run(int direction) {
@@ -177,7 +211,7 @@ public abstract class Critter {
 			return babies;
 		}
 	}
-
+	
 	/**
 	 * Clear the world of all critters, dead and alive
 	 */
