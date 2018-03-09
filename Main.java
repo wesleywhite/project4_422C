@@ -84,6 +84,17 @@ public class Main {
 		}
 		else if(input.equals("step")) {
 			//perform one time-step
+			Critter.worldTimeStep();
+		}
+		else if(input.equals("seed")) {
+			//invoke Critter.setSeed()
+			
+		}
+		else if(input.equals("make")) {
+			//to me it seems like we should make input an array with input split on spaces once we get to make
+			//also need it to be an array with split for seed and does if we implement count 
+			//make Critter
+			//Critter.makeCritter(critter_class_name);
 			
 		}
 		else {
