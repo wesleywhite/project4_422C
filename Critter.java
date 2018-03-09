@@ -187,6 +187,16 @@ public abstract class Critter {
 	
 	public static void worldTimeStep() {
 		// Complete this method.
+		for(Critter crit : collection) {
+			crit.doTimeStep();
+		}
+		//FAQ says that this is the order of stuff in worldTimeStep
+		// 1. increment timestep; timestep++; 
+		// 2. doTimeSteps();
+		// 3. Do the fights. doEncounters(); 
+		// 4. updateRestEnergy();
+		// 5. Generate Algae genAlgae();
+		// 6. Move babies to general population. population.addAll(babies); babies.clear();
 	}
 	
 	public static void displayWorld() {
