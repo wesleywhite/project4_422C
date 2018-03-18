@@ -23,10 +23,11 @@ import java.util.List;
 
 public abstract class Critter {
 	private static String myPackage;
+	private static int timestep = 0;
 	private	static List<Critter> population = new java.util.ArrayList<Critter>();
 	private static List<Critter> babies = new java.util.ArrayList<Critter>();
 	private static List<Critter> collection = new java.util.ArrayList<Critter>();
-	private static String[][] board = new String[Params.world_width][Params.world_height];
+	private static String[][] board = new String[Params.world_height][Params.world_width]; // I think you had width and height flipped.
 
 	// Gets the package name.  This assumes that Critter and its subclasses are all in the same package.
 	static {
@@ -51,49 +52,117 @@ public abstract class Critter {
 	
 	private int x_coord;
 	private int y_coord;
+
 	
 	protected final void walk(int direction) {
 		//this needs fixing so that the critter who walks has its coordinates updated
 		//Q5 in FAQ talks about it but it didn't really help me
 		//also view needs to be updated with coordinate changes
 		//Params.walk_energy_cost needs to be deducted from Critter's energy
+
+		this.energy -= Params.walk_energy_cost; // Deduct the walk energy cost
+
 		switch(direction) {
 		//(1,0)
-		case 1: x_coord += 1;
+		case 0: x_coord += 1;
 				break;
 		//(1,1)
-		case 2: x_coord += 1;
+		case 1: x_coord += 1;
 				y_coord += 1;
 				break;
 		//(0,1)
-		case 3: y_coord += 1;
+		case 2: y_coord += 1;
 				break;
 		//(-1,1)
-		case 4: x_coord -= 1;
+		case 3: x_coord -= 1;
 				y_coord += 1;
 				break;
 		//(-1,0)
-		case 5: x_coord -= 1;
+		case 4: x_coord -= 1;
 				break;
 		//(-1,-1)
-		case 6: x_coord -= 1;
+		case 5: x_coord -= 1;
 				y_coord -= 1;
 				break;
 		//(0,-1)
-		case 7:	y_coord -= 1;
+		case 6:	y_coord -= 1;
 				break;
 		//(1,-1)
-		case 8: x_coord += 1;
+		case 7: x_coord += 1;
 				y_coord -= 1;
 				break;
 		}
 	}
 	
 	protected final void run(int direction) {
+
+		//this needs fixing so that the critter who walks has its coordinates updated
+		//Q5 in FAQ talks about it but it didn't really help me
+		//also view needs to be updated with coordinate changes
+
+		this.energy -= Params.run_energy_cost; // Deduct the run energy cost
+
+		switch(direction) {
+			//(2,0)
+			case 0: x_coord += 2;
+				break;
+			//(2,2)
+			case 1: x_coord += 2;
+				y_coord += 2;
+				break;
+			//(0,2)
+			case 2: y_coord += 2;
+				break;
+			//(-2,2)
+			case 3: x_coord -= 2;
+				y_coord += 2;
+				break;
+			//(-2,0)
+			case 4: x_coord -= 2;
+				break;
+			//(-2,-2)
+			case 5: x_coord -= 2;
+				y_coord -= 2;
+				break;
+			//(0,-2)
+			case 6:	y_coord -= 2;
+				break;
+			//(2,-2)
+			case 7: x_coord += 2;
+				y_coord -= 2;
+				break;
+		}
 		
 	}
+
 	
 	protected final void reproduce(Critter offspring, int direction) {
+		// Confirm that the “parent” critter has energy at least as large as
+		// Params.min_reproduce_energy. If not, then your reproduce function
+		// should return immediately. Naturally, the parent must not be dead (e.g., did not
+		// lose a fight in the previous time step), but you should have removed any such crit
+		// ters from the critter collection and/or set their energy to zero anyway.
+		if (this.energy >= Params.min_reproduce_energy) {
+			offspring.energy = Math.floorDiv(this.energy, 2); // 1/2 rounding down
+			this.energy = (int) Math.ceil(this.energy / 2); // 1/2 rounding up
+
+			offspring.x_coord = this.x_coord;
+			offspring.y_coord = this.y_coord; // Give parent's coordinates
+
+			offspring.walk(direction);
+			offspring.energy += Params.walk_energy_cost; // Temporary fix.
+
+			babies.add(offspring); // Not added to the collection until after the time step.
+
+		}
+
+		// Assign the child energy equal to ½ of the parent’s energy (rounding fractions
+		// down). Reassign the parent so that it has ½ of its energy (rounding fraction up).
+
+		// Assign the child a position indicated by the parent’s current position and the spec
+		// ified direction. The child will always be created in a position immediately adja
+		// cent to the parent. If that position is occupied, put the child there anyway. The
+		// child will not “encounter” any other critters this time step
 	}
 
 	public abstract void doTimeStep();
@@ -216,21 +285,41 @@ public abstract class Critter {
 	 * Clear the world of all critters, dead and alive
 	 */
 	public static void clearWorld() {
-		// Complete this method.
+		// Remove critters from collection
+		for(Critter crit : collection) {
+			collection.remove(crit);
+		}
+		// Clear the board
+		for (int i = 0; i < Params.world_height; i++) {
+			for (int j = 0; j < Params.world_width; j++) {
+				board[i][j] = null;
+			}
+		}
 	}
 	
 	public static void worldTimeStep() {
-		// Complete this method.
+		//FAQ says that this is the order of stuff in worldTimeStep
+		// 1. increment timestep; timestep++;
+		timestep++;
+		// 2. doTimeSteps(); This is where wach critter will call walk/run
 		for(Critter crit : collection) {
 			crit.doTimeStep();
 		}
-		//FAQ says that this is the order of stuff in worldTimeStep
-		// 1. increment timestep; timestep++; 
-		// 2. doTimeSteps();
-		// 3. Do the fights. doEncounters(); 
+		// 3. Do the fights. doEncounters();
+
+
 		// 4. updateRestEnergy();
+
+		for(Critter crit : collection) {
+			crit.energy -= Params.rest_energy_cost;
+			if (crit.energy <= 0)
+				collection.remove(crit); // Dead critters are removed.
+		}
+
 		// 5. Generate Algae genAlgae();
 		// 6. Move babies to general population. population.addAll(babies); babies.clear();
+		collection.addAll(babies);
+		babies.clear();
 	}
 	
 	public static void displayWorld() {
