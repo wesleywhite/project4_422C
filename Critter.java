@@ -13,6 +13,7 @@ package assignment4;
  */
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 /* see the PDF for descriptions of the methods and fields in this class
@@ -27,7 +28,7 @@ public abstract class Critter {
 	private	static List<Critter> population = new java.util.ArrayList<Critter>();
 	private static List<Critter> babies = new java.util.ArrayList<Critter>();
 	private static List<Critter> collection = new java.util.ArrayList<Critter>();
-	private static String[][] board = new String[Params.world_height][Params.world_width]; // I think you had width and height flipped.
+	private static String[][] board = new String[Params.world_width][Params.world_height];
 
 	// Gets the package name.  This assumes that Critter and its subclasses are all in the same package.
 	static {
@@ -62,36 +63,45 @@ public abstract class Critter {
 
 		this.energy -= Params.walk_energy_cost; // Deduct the walk energy cost
 
-		switch(direction) {
-		//(1,0)
-		case 0: x_coord += 1;
-				break;
-		//(1,1)
-		case 1: x_coord += 1;
-				y_coord += 1;
-				break;
-		//(0,1)
-		case 2: y_coord += 1;
-				break;
-		//(-1,1)
-		case 3: x_coord -= 1;
-				y_coord += 1;
-				break;
-		//(-1,0)
-		case 4: x_coord -= 1;
-				break;
-		//(-1,-1)
-		case 5: x_coord -= 1;
-				y_coord -= 1;
-				break;
-		//(0,-1)
-		case 6:	y_coord -= 1;
-				break;
-		//(1,-1)
-		case 7: x_coord += 1;
-				y_coord -= 1;
-				break;
-		}
+		board[x_coord][y_coord] = null; // Clear the board of where it was, but what if there is something else there?
+
+		int height = Params.world_height;
+		int width = Params.world_width;
+
+//		switch(direction) {
+//		//(1,0)
+//		case 0: x_coord = (x_coord + 1) % width;
+//				break;
+//		//(1,1)
+//		case 1: x_coord = (x_coord + 1) % width;
+//				y_coord = (y_coord + 1) % height;
+//				break;
+//		//(0,1)
+//		case 2: y_coord = (y_coord + 1) % height;
+//				break;
+//		//(-1,1)
+//		case 3: x_coord = (x_coord - 1) % width;
+//				y_coord = (y_coord + 1) % height;
+//				break;
+//		//(-1,0)
+//		case 4: x_coord = (x_coord - 1) % width;
+//				break;
+//		//(-1,-1)
+//		case 5: x_coord = (x_coord - 1) % width;
+//				y_coord = (y_coord - 1) % height;
+//				break;
+//		//(0,-1)
+//		case 6:	y_coord = (y_coord - 1) % height;
+//				break;
+//		//(1,-1)
+//		case 7: x_coord = (x_coord + 1) % width;
+//				y_coord = (y_coord - 1) % height;
+//				break;
+//		}
+
+		move(direction, 1);
+
+		board[x_coord][y_coord] = this.toString(); // Add to new place on board
 	}
 	
 	protected final void run(int direction) {
@@ -102,37 +112,79 @@ public abstract class Critter {
 
 		this.energy -= Params.run_energy_cost; // Deduct the run energy cost
 
+		board[x_coord][y_coord] = null; // Clear the board of where it was, but what if there is something else there?
+
+//		switch(direction) {
+//			//(2,0)
+//			case 0: x_coord += 2;
+//				break;
+//			//(2,2)
+//			case 1: x_coord += 2;
+//				y_coord += 2;
+//				break;
+//			//(0,2)
+//			case 2: y_coord += 2;
+//				break;
+//			//(-2,2)
+//			case 3: x_coord -= 2;
+//				y_coord += 2;
+//				break;
+//			//(-2,0)
+//			case 4: x_coord -= 2;
+//				break;
+//			//(-2,-2)
+//			case 5: x_coord -= 2;
+//				y_coord -= 2;
+//				break;
+//			//(0,-2)
+//			case 6:	y_coord -= 2;
+//				break;
+//			//(2,-2)
+//			case 7: x_coord += 2;
+//				y_coord -= 2;
+//				break;
+//		}
+		move(direction, 2);
+
+		board[x_coord][y_coord] = this.toString(); // Add to new place on board
+		
+	}
+
+	private final void move(int direction, int steps) { // should this be static
+
+		int height = Params.world_height;
+		int width = Params.world_width;
+
 		switch(direction) {
-			//(2,0)
-			case 0: x_coord += 2;
+			//(1,0)
+			case 0: x_coord = (x_coord + steps) % width;
 				break;
-			//(2,2)
-			case 1: x_coord += 2;
-				y_coord += 2;
+			//(1,1)
+			case 1: x_coord = (x_coord + steps) % width;
+				y_coord = (y_coord + steps) % height;
 				break;
-			//(0,2)
-			case 2: y_coord += 2;
+			//(0,1)
+			case 2: y_coord = (y_coord + steps) % height;
 				break;
-			//(-2,2)
-			case 3: x_coord -= 2;
-				y_coord += 2;
+			//(-1,1)
+			case 3: x_coord = (x_coord - steps) % width;
+				y_coord = (y_coord + steps) % height;
 				break;
-			//(-2,0)
-			case 4: x_coord -= 2;
+			//(-1,0)
+			case 4: x_coord = (x_coord - steps) % width;
 				break;
-			//(-2,-2)
-			case 5: x_coord -= 2;
-				y_coord -= 2;
+			//(-1,-1)
+			case 5: x_coord = (x_coord - steps) % width;
+				y_coord = (y_coord - steps) % height;
 				break;
-			//(0,-2)
-			case 6:	y_coord -= 2;
+			//(0,-1)
+			case 6:	y_coord = (y_coord - steps) % height;
 				break;
-			//(2,-2)
-			case 7: x_coord += 2;
-				y_coord -= 2;
+			//(1,-1)
+			case 7: x_coord = (x_coord + steps) % width;
+				y_coord = (y_coord - steps) % height;
 				break;
 		}
-		
 	}
 
 	
@@ -307,6 +359,11 @@ public abstract class Critter {
 		}
 		// 3. Do the fights. doEncounters();
 
+		// check to see if there are any in the same position.
+		// invoke the two fight methods
+		// both true, roll the dice
+		// keep doing this until there are no more encounters
+
 
 		// 4. updateRestEnergy();
 
@@ -317,9 +374,87 @@ public abstract class Critter {
 		}
 
 		// 5. Generate Algae genAlgae();
+
+		for (int i = 0; i < Params.refresh_algae_count; i++) {
+			Algae alg = new Algae();
+			alg.setEnergy(Params.start_energy);
+			int x = getRandomInt(Params.world_height);
+			int y = getRandomInt(Params.world_width);
+			alg.setX_coord(x);
+			alg.setY_coord(y);
+			collection.add(alg);
+			board[x][y] = alg.toString();
+		}
+
+
 		// 6. Move babies to general population. population.addAll(babies); babies.clear();
 		collection.addAll(babies);
 		babies.clear();
+	}
+
+	/**
+	 * Returns list of 2 critters at the same spot, or null if none are found.
+	 */
+	private static List<Critter> samePlace() {
+		for (int i = 0; i < collection.size(); i++) {
+			for (int j = 1; j < collection.size() - 1; j++) {
+
+				if (collection.get(i).x_coord == collection.get(j).x_coord && collection.get(i).y_coord == collection.get(j).y_coord) {
+					ArrayList<Critter> tempList = new ArrayList<Critter>();
+					tempList.add(collection.get(j));
+					tempList.add(collection.get(i));
+					return tempList;
+				}
+
+			}
+		}
+		return null; // maybe return empty array
+	}
+
+	private static void doEncounters() {
+		List<Critter> crits = samePlace();
+		while (crits != null) {
+
+			Critter first = crits.get(0);
+			Critter second = crits.get(1);
+			int firstRoll, secondRoll;
+			boolean firstFight, secondFight;
+
+			firstFight = first.fight(second.toString());
+
+			// check to see if there are any in the same position.
+			// invoke the two fight methods
+			// both true, roll the dice
+			// keep doing this until there are no more encounters
+
+
+			secondFight = second.fight(first.toString());
+
+			if (first.x_coord == second.x_coord && first.y_coord == second.y_coord){
+				// check if both alive
+				if (firstFight) {
+					firstRoll = getRandomInt(first.energy);
+				} else {
+					firstRoll = 0;
+				}
+
+				if (secondFight) {
+					secondRoll = getRandomInt(second.energy);
+				} else {
+					secondRoll = 0;
+				}
+
+				if (firstRoll >= secondRoll) {
+					// A wins
+				} else {
+					// B wins
+				}
+
+			}
+
+			crits = samePlace();
+		}
+
 	}
 	
 	public static void displayWorld() {
