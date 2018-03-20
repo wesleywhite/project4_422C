@@ -16,7 +16,7 @@ public class Critter4 extends TestCritter {
 	@Override
 	public boolean fight(String opponent) {
 
-		return false; // Never fights
+	    return (opponent.equals("@")); // Only fights algae
 	}
 
 	@Override

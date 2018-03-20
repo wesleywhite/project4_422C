@@ -2,14 +2,13 @@ package assignment4;
 /* CRITTERS Critter.java
  * EE422C Project 4 submission by
  * Replace <...> with your actual data.
- * <Student1 Name>
- * <Student1 EID>
+ * Michael Blume
+ * mab7645
  * <Student1 5-digit Unique No.>
  * <Student2 Name>
  * <Student2 EID>
  * <Student2 5-digit Unique No.>
- * Slip days used: <0>
- * Fall 2016
+ * Spring 2018
  */
 
 
@@ -57,108 +56,42 @@ public abstract class Critter {
 
 	
 	protected final void walk(int direction) {
-		//this needs fixing so that the critter who walks has its coordinates updated
-		//Q5 in FAQ talks about it but it didn't really help me
-		//also view needs to be updated with coordinate changes
-		//Params.walk_energy_cost needs to be deducted from Critter's energy
 
 		this.energy -= Params.walk_energy_cost; // Deduct the walk energy cost
+		int oldX = x_coord;
+		int oldY = y_coord;
 
 		board[x_coord][y_coord] = null; // Clear the board of where it was
-		for (Critter critter : collection) {
-			if (critter.x_coord == x_coord && critter.y_coord == y_coord) {
-				board[x_coord][y_coord] = critter.toString();
-			}
-		}
-
-//		switch(direction) {
-//		//(1,0)
-//		case 0: x_coord = (x_coord + 1) % width;
-//				break;
-//		//(1,1)
-//		case 1: x_coord = (x_coord + 1) % width;
-//				y_coord = (y_coord + 1) % height;
-//				break;
-//		//(0,1)
-//		case 2: y_coord = (y_coord + 1) % height;
-//				break;
-//		//(-1,1)
-//		case 3: x_coord = (x_coord - 1) % width;
-//				y_coord = (y_coord + 1) % height;
-//				break;
-//		//(-1,0)
-//		case 4: x_coord = (x_coord - 1) % width;
-//				break;
-//		//(-1,-1)
-//		case 5: x_coord = (x_coord - 1) % width;
-//				y_coord = (y_coord - 1) % height;
-//				break;
-//		//(0,-1)
-//		case 6:	y_coord = (y_coord - 1) % height;
-//				break;
-//		//(1,-1)
-//		case 7: x_coord = (x_coord + 1) % width;
-//				y_coord = (y_coord - 1) % height;
-//				break;
-//		}
 
 		move(direction, 1);
-
 		board[x_coord][y_coord] = this.toString(); // Add to new place on board
+
+		for (Critter critter : collection) { // But replace it if there is something else there too
+			if (critter.x_coord == oldX && critter.y_coord == oldY) {
+				board[oldX][oldY] = critter.toString();
+			}
+		}
 	}
 	
 	protected final void run(int direction) {
 
-		//this needs fixing so that the critter who walks has its coordinates updated
-		//Q5 in FAQ talks about it but it didn't really help me
-		//also view needs to be updated with coordinate changes
-
 		this.energy -= Params.run_energy_cost; // Deduct the run energy cost
+		int oldX = x_coord;
+		int oldY = y_coord;
 
 		board[x_coord][y_coord] = null; // Clear the board of where it was
-		for (Critter critter : collection) {
-			if (critter.x_coord == x_coord && critter.y_coord == y_coord) {
-				board[x_coord][y_coord] = critter.toString();
+
+		move(direction, 2);
+		board[x_coord][y_coord] = this.toString(); // Add to new place on board
+
+		for (Critter critter : collection) { // But replace it if there is something else there too
+			if (critter.x_coord == oldX && critter.y_coord == oldY) {
+				board[oldX][oldY] = critter.toString();
 			}
 		}
-
-//		switch(direction) {
-//			//(2,0)
-//			case 0: x_coord += 2;
-//				break;
-//			//(2,2)
-//			case 1: x_coord += 2;
-//				y_coord += 2;
-//				break;
-//			//(0,2)
-//			case 2: y_coord += 2;
-//				break;
-//			//(-2,2)
-//			case 3: x_coord -= 2;
-//				y_coord += 2;
-//				break;
-//			//(-2,0)
-//			case 4: x_coord -= 2;
-//				break;
-//			//(-2,-2)
-//			case 5: x_coord -= 2;
-//				y_coord -= 2;
-//				break;
-//			//(0,-2)
-//			case 6:	y_coord -= 2;
-//				break;
-//			//(2,-2)
-//			case 7: x_coord += 2;
-//				y_coord -= 2;
-//				break;
-//		}
-		move(direction, 2);
-
-		board[x_coord][y_coord] = this.toString(); // Add to new place on board
-		
 	}
 
-	private final void move(int direction, int steps) { // should this be static
+	private void move(int direction, int steps) {
 
 		hasMoved = true;
 
@@ -166,38 +99,38 @@ public abstract class Critter {
 		int width = Params.world_width;
 
 		switch(direction) {
-			//(1,0)
+			// right
 			case 0: x_coord = (x_coord + steps) % width;
 					break;
-			//(1,1)
+			// right up
 			case 1: x_coord = (x_coord + steps) % width;
-					y_coord = (y_coord + steps) % height;
+					y_coord = Math.floorMod(y_coord - steps, height);
 					break;
-			//(0,1)
-			case 2: y_coord = (y_coord + steps) % height;
+			// up
+			case 2: y_coord = Math.floorMod(y_coord - steps, height);
 					break;
-			//(-1,1)
+			// left up
 			case 3: x_coord = (x_coord - steps) % width;
+					y_coord = Math.floorMod(y_coord - steps, height);
+					break;
+			// left
+			case 4: x_coord = Math.floorMod(x_coord - steps, width);
+					break;
+			// down left
+			case 5: x_coord = Math.floorMod(x_coord - steps, width);
 					y_coord = (y_coord + steps) % height;
 					break;
-			//(-1,0)
-			case 4: x_coord = (x_coord - steps) % width;
+			// down
+			case 6:	y_coord = (y_coord + steps) % height;
 					break;
-			//(-1,-1)
-			case 5: x_coord = (x_coord - steps) % width;
-					y_coord = (y_coord - steps) % height;
-					break;
-			//(0,-1)
-			case 6:	y_coord = (y_coord - steps) % height;
-					break;
-			//(1,-1)
+			// down right
 			case 7: x_coord = (x_coord + steps) % width;
-					y_coord = (y_coord - steps) % height;
+					y_coord = (y_coord + steps) % height;
 					break;
 		}
 	}
 
-	
+
 	protected final void reproduce(Critter offspring, int direction) {
 		// Confirm that the “parent” critter has energy at least as large as
 		// Params.min_reproduce_energy. If not, then your reproduce function
@@ -206,18 +139,18 @@ public abstract class Critter {
 		// ters from the critter collection and/or set their energy to zero anyway.
 		if (this.energy >= Params.min_reproduce_energy) {
 			offspring.energy = Math.floorDiv(this.energy, 2); // 1/2 rounding down
-			this.energy = (int) Math.ceil(this.energy / 2); // 1/2 rounding up
+			this.energy = (int) Math.ceil((double) this.energy / 2); // 1/2 rounding up
+
 
 			offspring.x_coord = this.x_coord;
 			offspring.y_coord = this.y_coord; // Give parent's coordinates
 
-			offspring.walk(direction);
-			offspring.energy += Params.walk_energy_cost; // Temporary fix.
+			offspring.walk(direction); // This puts the baby on the board, but not in the collection.
+			offspring.energy += Params.walk_energy_cost; // Adds back energy that was taken out in walk.
 
 			babies.add(offspring); // Not added to the collection until after the time step.
 
 		}
-
 		// Assign the child energy equal to ½ of the parent’s energy (rounding fractions
 		// down). Reassign the parent so that it has ½ of its energy (rounding fraction up).
 
@@ -264,7 +197,16 @@ public abstract class Critter {
 	 */
 	public static List<Critter> getInstances(String critter_class_name) throws InvalidCritterException {
 		List<Critter> result = new java.util.ArrayList<Critter>();
-	
+		try {
+			Class c = Class.forName(critter_class_name);
+			for (Critter critter : collection) {
+				if (critter.getClass().equals(c)) {
+					result.add(critter);
+				}
+			}
+		} catch(Exception e) {
+			throw new InvalidCritterException(critter_class_name);
+		}
 		return result;
 	}
 	
@@ -330,7 +272,7 @@ public abstract class Critter {
 		 * implemented for grading tests to work.
 		 */
 		protected static List<Critter> getPopulation() {
-			return population;
+			return collection;
 		}
 		
 		/*
@@ -349,9 +291,7 @@ public abstract class Critter {
 	 */
 	public static void clearWorld() {
 		// Remove critters from collection
-		for(Critter crit : collection) {
-			collection.remove(crit);
-		}
+		collection.clear();
 		// Clear the board
 		for (int i = 0; i < Params.world_height; i++) {
 			for (int j = 0; j < Params.world_width; j++) {
@@ -361,60 +301,53 @@ public abstract class Critter {
 	}
 	
 	public static void worldTimeStep() {
-		//FAQ says that this is the order of stuff in worldTimeStep
+
 		// 1. increment timestep; timestep++;
 		timestep++;
+
 		// 2. doTimeSteps(); This is where wach critter will call walk/run
-		for(Critter crit : collection) {
-			crit.doTimeStep();
+		for(Critter critter : collection) {
+            critter.doTimeStep();
 		}
 		// 3. Do the fights. doEncounters();
 		doEncounters();
-
+		// Clear the hasMoved flag each time step
 		for (Critter crit : collection) {
 			crit.hasMoved = false;
 		}
 
-		// check to see if there are any in the same position.
-		// invoke the two fight methods
-		// both true, roll the dice
-		// keep doing this until there are no more encounters
-
-
 		// 4. updateRestEnergy();
-
-		for(Critter crit : collection) {
-			crit.energy -= Params.rest_energy_cost;
-			if (crit.energy <= 0) {
-				collection.remove(crit); // Dead critters are removed.
-				board[crit.x_coord][crit.y_coord] = null;
-				for (Critter critter : collection) {
-					if (critter.x_coord == crit.x_coord && critter.y_coord == crit.y_coord) {
-						board[crit.x_coord][crit.y_coord] = critter.toString();
-					}
-				}
+		for(Critter critter : collection) {
+            critter.energy -= Params.rest_energy_cost;
+			if (critter.energy <= 0) {
+				remove(critter);
 			}
 		}
 
-
 		// 5. Generate Algae genAlgae();
+		genAlgae();
 
-		for (int i = 0; i < Params.refresh_algae_count; i++) {
-			Algae alg = new Algae();
-			alg.setEnergy(Params.start_energy);
-			int x = getRandomInt(Params.world_height);
-			int y = getRandomInt(Params.world_width);
-			alg.setX_coord(x);
-			alg.setY_coord(y);
-			collection.add(alg);
-			board[x][y] = alg.toString();
-		}
-
-
-		// 6. Move babies to general population. population.addAll(babies); babies.clear();
+		// 6. Move babies to general population. They are already on the board.
 		collection.addAll(babies);
 		babies.clear();
 	}
+
+
+    /**
+     * Generates Algae
+     */
+	private static void genAlgae() {
+        for (int i = 0; i < Params.refresh_algae_count; i++) {
+            Algae alg = new Algae();
+            alg.setEnergy(Params.start_energy);
+            int x = getRandomInt(Params.world_height);
+            int y = getRandomInt(Params.world_width);
+            alg.setX_coord(x);
+            alg.setY_coord(y);
+            collection.add(alg);
+            board[x][y] = alg.toString();
+        }
+    }
 
 	/**
 	 * Returns list of 2 critters at the same spot, or null if none are found.
@@ -432,10 +365,12 @@ public abstract class Critter {
 
 			}
 		}
-		return null; // maybe return empty array
+		return null;
 	}
 
-
+    /**
+     * Returns true if the current x and y is occupied, false otherwise.
+     */
 	private static boolean isOccupied(int x, int y) {
 		for (Critter crit : collection) {
 			if (crit.x_coord == x && crit.y_coord == y)
@@ -444,8 +379,25 @@ public abstract class Critter {
 		return false;
 	}
 
+    /**
+     * Removes critter from the collection, and replaces its spot with another critter if there is one there.
+     */
+	private static void remove(Critter critter) {
+        collection.remove(critter);
+        board[critter.x_coord][critter.y_coord] = null;
+        for (Critter crit : collection) {
+            if (crit.x_coord == critter.x_coord && crit.y_coord == critter.y_coord)
+                board[critter.x_coord][critter.y_coord] = crit.toString();
+        }
+
+    }
+
+    /**
+     * Handles all the fights, running away, etc.
+     */
 	private static void doEncounters() {
 		List<Critter> crits = samePlace();
+
 		while (crits != null) {
 
 			Critter first = crits.get(0);
@@ -453,85 +405,98 @@ public abstract class Critter {
 			int firstRoll, secondRoll;
 			boolean firstFight, secondFight;
 
+			if (first.toString().equals("@")) {
+			    // Algae cannot run away.
+                first.hasMoved = true;
+                firstRoll = -1;
+            }
+
+			if (second.toString().equals("@")) {
+			    // Algae cannot run away.
+                second.hasMoved = true;
+                secondRoll = -1;
+            }
+
+
 			firstFight = first.fight(second.toString());
 			if (!firstFight) {
-				// wants to run away
-				// and hasnt moved yet in time step
+				// Wants to run away
+				// And has not moved yet in time step
 				if (!first.hasMoved) {
 					// int random = getRandomInt(8);
 					int x = (first.x_coord + 1) % Params.world_width;
 					int y = first.y_coord;
 					if (!isOccupied(x, y)) {
 						first.walk(0);
-						first.energy += Params.walk_energy_cost; // add back the energy it is subtracted later
+						first.energy += Params.walk_energy_cost; // Add back the energy, it is subtracted later
 					}
 				}
-				first.energy -= Params.walk_energy_cost; // Subtract energy even if it cant walk
+				first.energy -= Params.walk_energy_cost; // Subtract energy even if it cannot walk
 			}
 
 			if (first.energy <= 0) {
-				collection.remove(first);
-				board[first.x_coord][first.y_coord] = null;
-				for (Critter critter : collection) {
-					if (critter.x_coord == first.x_coord && critter.y_coord == first.y_coord)
-						board[first.x_coord][first.y_coord] = critter.toString();
-				}
+//				collection.remove(first);
+//				board[first.x_coord][first.y_coord] = null;
+//				for (Critter critter : collection) {
+//					if (critter.x_coord == first.x_coord && critter.y_coord == first.y_coord)
+//						board[first.x_coord][first.y_coord] = critter.toString();
+//				}
+                remove(first);
 			}
-
-
-			// check to see if there are any in the same position.
-			// invoke the two fight methods
-			// both true, roll the dice
-			// keep doing this until there are no more encounters
 
 
 			secondFight = second.fight(first.toString());
 			if (!secondFight) {
-				// wants to run away
-				// and hasnt moved yet in time step
+				// Wants to run away
+                // And has not moved yet in time step
 				if (!second.hasMoved) {
 					// int random = getRandomInt(8);
-					int x = (second.x_coord - 1) % Params.world_width; // tries to go left
+					int x = Math.floorMod(second.x_coord - 1, Params.world_width); // tries to go left
 					int y = second.y_coord;
 					if (!isOccupied(x, y)) {
 						second.walk(4);
-						second.energy += Params.walk_energy_cost; // add back the energy it is subtracted later
+						second.energy += Params.walk_energy_cost; // Add back the energy, it is subtracted later
 					}
 				}
 				second.energy -= Params.walk_energy_cost; // Subtract energy even if it cant walk
 			}
 
 			if (second.energy <= 0) {
-				board[second.x_coord][second.y_coord] = null;
-				collection.remove(second);
-				for (Critter critter : collection) {
-					if (critter.x_coord == second.x_coord && critter.y_coord == second.y_coord)
-						board[second.x_coord][second.y_coord] = critter.toString();
-				}
+//				board[second.x_coord][second.y_coord] = null;
+//				collection.remove(second);
+//				for (Critter critter : collection) {
+//					if (critter.x_coord == second.x_coord && critter.y_coord == second.y_coord)
+//						board[second.x_coord][second.y_coord] = critter.toString();
+//				}
+                remove(second);
 			}
 
 
 
 			if (first.x_coord == second.x_coord && first.y_coord == second.y_coord && collection.contains(first) && collection.contains(second)) {
 
+			    // Roll the dice
 				if (firstFight) {
 					firstRoll = getRandomInt(first.energy);
+				} else if (first.toString().equals("@")) {
+					firstRoll = -1;
 				} else {
-					firstRoll = 0;
-				}
+				    firstRoll = 0;
+                }
 
 				if (secondFight) {
 					secondRoll = getRandomInt(second.energy);
+				} else if (second.toString().equals("@")) {
+					secondRoll = -2;
 				} else {
-					secondRoll = 0;
-				}
+				    secondRoll = 0;
+                }
 
+                // Check who wins
 				if (firstRoll >= secondRoll) {
 					first.energy += second.energy / 2;
 					board[second.x_coord][second.y_coord] = first.toString();
 					collection.remove(second);
-
-
 				} else {
 					second.energy += first.energy / 2;
 					board[first.x_coord][first.y_coord] = second.toString();
@@ -544,7 +509,10 @@ public abstract class Critter {
 		}
 
 	}
-	
+
+    /**
+     * Display the world and the 2D array of strings
+     */
 	public static void displayWorld() {
 		// Print top border
 		System.out.print("+");
@@ -557,9 +525,9 @@ public abstract class Critter {
 			if so: print their symbol
 			else: print an empty space
 		*/
-		for(int x = 0; x < Params.world_width; x++) {
+		for(int y = 0; y < Params.world_height; y++) {
 			System.out.print('|');
-			for(int y = 0; y < Params.world_height; y++) {
+			for(int x = 0; x < Params.world_width; x++) {
 				if(board[x][y] == null) {
 					System.out.print(' ');
 				}

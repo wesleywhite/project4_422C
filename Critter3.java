@@ -15,6 +15,8 @@ public class Critter3 extends TestCritter {
 
 	@Override
 	public boolean fight(String opponent) {
+	    if (opponent.equals("@"))
+	        return true;
         return getEnergy() >= (Params.start_energy / 2); // Fights if it has at least half of the starting energy
     }
 

@@ -13,8 +13,9 @@ package assignment4;
 
 import java.util.Scanner;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
+import java.lang.reflect.*;
+
 
 /*
  * Usage: java <pkgname>.Main <input file> test
@@ -69,68 +70,138 @@ public class Main {
         
         /* Do not alter the code above for your submission. */
         /* Write your code below. */
-        parse(kb);
+         parse(kb);
+//        try {
+//            //Critter.makeCritter("assignment4.Craig");
+//            Critter.makeCritter("assignment4.Critter1");
+//            Critter.makeCritter("assignment4.Critter2");
+//            Critter.makeCritter("assignment4.Critter3");
+//            Critter.makeCritter("assignment4.Critter4");
+//            Critter.makeCritter("assignment4.Critter4");
+//            Critter.makeCritter("assignment4.Critter4");
+//            Critter.makeCritter("assignment4.Algae");
+//        } catch (InvalidCritterException e) {
+//            e.printStackTrace();
+//        }
+//
+//        try {
+//            List<Critter> tempList = Critter.getInstances("assignment4.Critter4");
+//        } catch (InvalidCritterException e) {
+//            e.printStackTrace();
+//        }
+//        Critter.displayWorld();
+//        Critter.worldTimeStep();
+//        Critter.displayWorld();
+//        Critter.clearWorld();
+//        Critter.displayWorld();
+        //parse(kb);
         /* Write your code above */
         System.out.flush();
 
     }
     
-    public static String parse(Scanner keyboard) {
-		String command = keyboard.nextLine();
-		String split[] = command.split(" ");
-		String input = split[0];
+    public static void parse(Scanner keyboard) {
 
+        while (true) {
+            String input = keyboard.nextLine();
+            boolean invalid = false;
+            String split[] = input.split(" ");
+            String command = split[0];
 
-		if(input.equals("quit")) {
-			System.exit(0);
-		}
-		else if(input.equals("show")) {
-			//invoke Critter.displayWorld()
-            Critter.displayWorld();
-		}
-		else if(input.equals("step")) {
-            int amount = 1;
-            if (split.length == 2)
-                amount = Integer.parseInt(split[1]);
-
-            while (amount > 0) {
-                Critter.worldTimeStep();
-                amount--;
+            if (command.equals("quit")) {
+                if (split.length != 1)
+                    invalid = true;
+                else
+                    System.exit(0);
             }
 
-		}
-		else if(input.equals("seed")) {
-		    if (split.length == 2)
-		        Critter.setSeed(Long.parseLong(split[1]));
-		}
-		else if(input.equals("make")) {
-		    int amount = 1;
-		    if (split.length == 3)
-		        amount = Integer.parseInt(split[2]);
-            try {
-                while (amount > 0) {
-                    Critter.makeCritter(split[1]);
-                    amount--;
+            else if (command.equals("show")) {
+                if (split.length != 1)
+                    invalid = true;
+                else
+                    Critter.displayWorld();
+            }
+
+            else if (command.equals("step")) {
+                int amount = 1;
+                if (split.length == 2) {
+                    try {
+                        amount = Integer.parseInt(split[1]);
+                    } catch (NumberFormatException e) {
+                        System.out.println("error processing: " + input);
+                        continue;
+                    }
                 }
-            } catch (InvalidCritterException e) {
-                System.out.println(e.toString());
-            }
-		}
-		else if(input.equals("stats")) {
-		    String className = split[1];
+                if (split.length == 1 || split.length == 2) {
+                    while (amount > 0) {
+                        Critter.worldTimeStep();
+                        amount--;
+                    }
+                } else {
+                    invalid = true;
+                }
 
-            try {
-                List<Critter> temp = Critter.getInstances(className);
-                Critter.runStats(temp);
-
-            } catch (InvalidCritterException e) {
-                System.out.println(e.toString());
             }
 
+            else if (command.equals("seed")) {
+                if (split.length == 2)
+                    Critter.setSeed(Long.parseLong(split[1]));
+                else
+                    invalid = true;
+            }
+
+            else if (command.equals("make")) {
+                int amount = 1;
+                if (split.length == 3) {
+                    try {
+                        amount = Integer.parseInt(split[2]);
+                    } catch (NumberFormatException e) {
+                        System.out.println("error processing: " + input);
+                        continue;
+                    }
+                }
+                if (split.length == 2 || split.length == 3) {
+                    try {
+                        String className = myPackage + "." + split[1];
+                        while (amount > 0) {
+                            Critter.makeCritter(className);
+                            amount--;
+                        }
+                    } catch (InvalidCritterException e) {
+                        System.out.println("error processing: " + input);
+                        continue;
+                    }
+                }
+                else {
+                    invalid = true;
+                }
+            }
+
+            else if (command.equals("stats")) {
+                String className = myPackage + "." + split[1];
+
+                try {
+                    List<Critter> temp = Critter.getInstances(className);
+                    Class c = Class.forName(className);
+                    Object o = c.newInstance();
+                    String methodName = "runStats";
+                    Method runStats = o.getClass().getMethod(methodName, List.class);
+                    runStats.invoke(o, temp);
+
+                } catch (Exception e) {
+                    System.out.println("error processing: " + input);
+                    continue;
+                }
+            }
+
+            else {
+                invalid = true;
+            }
+
+            if (invalid) {
+                System.out.println("invalid command: " + input);
+                invalid = false;
+            }
         }
-		else {
-			System.exit(0);
-		}
-		return null;
 	}
 }

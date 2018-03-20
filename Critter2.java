@@ -17,7 +17,7 @@ public class Critter2 extends TestCritter {
 	@Override
 	public boolean fight(String opponent) {
 
-		return true;
+		return true; // Always fights
 	}
 
 	@Override
