@@ -13,6 +13,8 @@ package assignment4;
 
 import java.util.Scanner;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * Usage: java <pkgname>.Main <input file> test
@@ -74,29 +76,58 @@ public class Main {
     }
     
     public static String parse(Scanner keyboard) {
-		String input = keyboard.nextLine();
+		String command = keyboard.nextLine();
+		String split[] = command.split(" ");
+		String input = split[0];
+
+
 		if(input.equals("quit")) {
 			System.exit(0);
 		}
 		else if(input.equals("show")) {
 			//invoke Critter.displayWorld()
-			Critter.displayWorld();
+            Critter.displayWorld();
 		}
 		else if(input.equals("step")) {
-			//perform one time-step
-			Critter.worldTimeStep();
+            int amount = 1;
+            if (split.length == 2)
+                amount = Integer.parseInt(split[1]);
+
+            while (amount > 0) {
+                Critter.worldTimeStep();
+                amount--;
+            }
+
 		}
 		else if(input.equals("seed")) {
-			//invoke Critter.setSeed()
-			
+		    if (split.length == 2)
+		        Critter.setSeed(Long.parseLong(split[1]));
 		}
 		else if(input.equals("make")) {
-			//to me it seems like we should make input an array with input split on spaces once we get to make
-			//also need it to be an array with split for seed and does if we implement count 
-			//make Critter
-			//Critter.makeCritter(critter_class_name);
-			
+		    int amount = 1;
+		    if (split.length == 3)
+		        amount = Integer.parseInt(split[2]);
+            try {
+                while (amount > 0) {
+                    Critter.makeCritter(split[1]);
+                    amount--;
+                }
+            } catch (InvalidCritterException e) {
+                System.out.println(e.toString());
+            }
 		}
+		else if(input.equals("stats")) {
+		    String className = split[1];
+
+            try {
+                List<Critter> temp = Critter.getInstances(className);
+                Critter.runStats(temp);
+
+            } catch (InvalidCritterException e) {
+                System.out.println(e.toString());
+            }
+
+        }
 		else {
 			System.exit(0);
 		}

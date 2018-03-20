@@ -53,6 +53,7 @@ public abstract class Critter {
 	
 	private int x_coord;
 	private int y_coord;
+	private boolean hasMoved;
 
 	
 	protected final void walk(int direction) {
@@ -63,10 +64,12 @@ public abstract class Critter {
 
 		this.energy -= Params.walk_energy_cost; // Deduct the walk energy cost
 
-		board[x_coord][y_coord] = null; // Clear the board of where it was, but what if there is something else there?
-
-		int height = Params.world_height;
-		int width = Params.world_width;
+		board[x_coord][y_coord] = null; // Clear the board of where it was
+		for (Critter critter : collection) {
+			if (critter.x_coord == x_coord && critter.y_coord == y_coord) {
+				board[x_coord][y_coord] = critter.toString();
+			}
+		}
 
 //		switch(direction) {
 //		//(1,0)
@@ -112,7 +115,12 @@ public abstract class Critter {
 
 		this.energy -= Params.run_energy_cost; // Deduct the run energy cost
 
-		board[x_coord][y_coord] = null; // Clear the board of where it was, but what if there is something else there?
+		board[x_coord][y_coord] = null; // Clear the board of where it was
+		for (Critter critter : collection) {
+			if (critter.x_coord == x_coord && critter.y_coord == y_coord) {
+				board[x_coord][y_coord] = critter.toString();
+			}
+		}
 
 //		switch(direction) {
 //			//(2,0)
@@ -152,38 +160,40 @@ public abstract class Critter {
 
 	private final void move(int direction, int steps) { // should this be static
 
+		hasMoved = true;
+
 		int height = Params.world_height;
 		int width = Params.world_width;
 
 		switch(direction) {
 			//(1,0)
 			case 0: x_coord = (x_coord + steps) % width;
-				break;
+					break;
 			//(1,1)
 			case 1: x_coord = (x_coord + steps) % width;
-				y_coord = (y_coord + steps) % height;
-				break;
+					y_coord = (y_coord + steps) % height;
+					break;
 			//(0,1)
 			case 2: y_coord = (y_coord + steps) % height;
-				break;
+					break;
 			//(-1,1)
 			case 3: x_coord = (x_coord - steps) % width;
-				y_coord = (y_coord + steps) % height;
-				break;
+					y_coord = (y_coord + steps) % height;
+					break;
 			//(-1,0)
 			case 4: x_coord = (x_coord - steps) % width;
-				break;
+					break;
 			//(-1,-1)
 			case 5: x_coord = (x_coord - steps) % width;
-				y_coord = (y_coord - steps) % height;
-				break;
+					y_coord = (y_coord - steps) % height;
+					break;
 			//(0,-1)
 			case 6:	y_coord = (y_coord - steps) % height;
-				break;
+					break;
 			//(1,-1)
 			case 7: x_coord = (x_coord + steps) % width;
-				y_coord = (y_coord - steps) % height;
-				break;
+					y_coord = (y_coord - steps) % height;
+					break;
 		}
 	}
 
@@ -237,6 +247,7 @@ public abstract class Critter {
 		newCritter.energy = Params.start_energy;
 		newCritter.x_coord = getRandomInt(Params.world_width);
 		newCritter.y_coord = getRandomInt(Params.world_height);
+		newCritter.hasMoved = false;
 		collection.add(newCritter);
 		board[newCritter.x_coord][newCritter.y_coord] = newCritter.toString();
 		}
@@ -358,6 +369,11 @@ public abstract class Critter {
 			crit.doTimeStep();
 		}
 		// 3. Do the fights. doEncounters();
+		doEncounters();
+
+		for (Critter crit : collection) {
+			crit.hasMoved = false;
+		}
 
 		// check to see if there are any in the same position.
 		// invoke the two fight methods
@@ -369,9 +385,17 @@ public abstract class Critter {
 
 		for(Critter crit : collection) {
 			crit.energy -= Params.rest_energy_cost;
-			if (crit.energy <= 0)
+			if (crit.energy <= 0) {
 				collection.remove(crit); // Dead critters are removed.
+				board[crit.x_coord][crit.y_coord] = null;
+				for (Critter critter : collection) {
+					if (critter.x_coord == crit.x_coord && critter.y_coord == crit.y_coord) {
+						board[crit.x_coord][crit.y_coord] = critter.toString();
+					}
+				}
+			}
 		}
+
 
 		// 5. Generate Algae genAlgae();
 
@@ -396,8 +420,8 @@ public abstract class Critter {
 	 * Returns list of 2 critters at the same spot, or null if none are found.
 	 */
 	private static List<Critter> samePlace() {
-		for (int i = 0; i < collection.size(); i++) {
-			for (int j = 1; j < collection.size() - 1; j++) {
+		for (int i = 0; i < collection.size() - 1; i++) {
+			for (int j = i + 1; j < collection.size(); j++) {
 
 				if (collection.get(i).x_coord == collection.get(j).x_coord && collection.get(i).y_coord == collection.get(j).y_coord) {
 					ArrayList<Critter> tempList = new ArrayList<Critter>();
@@ -411,6 +435,15 @@ public abstract class Critter {
 		return null; // maybe return empty array
 	}
 
+
+	private static boolean isOccupied(int x, int y) {
+		for (Critter crit : collection) {
+			if (crit.x_coord == x && crit.y_coord == y)
+				return true;
+		}
+		return false;
+	}
+
 	private static void doEncounters() {
 		List<Critter> crits = samePlace();
 		while (crits != null) {
@@ -421,6 +454,30 @@ public abstract class Critter {
 			boolean firstFight, secondFight;
 
 			firstFight = first.fight(second.toString());
+			if (!firstFight) {
+				// wants to run away
+				// and hasnt moved yet in time step
+				if (!first.hasMoved) {
+					// int random = getRandomInt(8);
+					int x = (first.x_coord + 1) % Params.world_width;
+					int y = first.y_coord;
+					if (!isOccupied(x, y)) {
+						first.walk(0);
+						first.energy += Params.walk_energy_cost; // add back the energy it is subtracted later
+					}
+				}
+				first.energy -= Params.walk_energy_cost; // Subtract energy even if it cant walk
+			}
+
+			if (first.energy <= 0) {
+				collection.remove(first);
+				board[first.x_coord][first.y_coord] = null;
+				for (Critter critter : collection) {
+					if (critter.x_coord == first.x_coord && critter.y_coord == first.y_coord)
+						board[first.x_coord][first.y_coord] = critter.toString();
+				}
+			}
+
 
 			// check to see if there are any in the same position.
 			// invoke the two fight methods
@@ -429,9 +486,34 @@ public abstract class Critter {
 
 
 			secondFight = second.fight(first.toString());
+			if (!secondFight) {
+				// wants to run away
+				// and hasnt moved yet in time step
+				if (!second.hasMoved) {
+					// int random = getRandomInt(8);
+					int x = (second.x_coord - 1) % Params.world_width; // tries to go left
+					int y = second.y_coord;
+					if (!isOccupied(x, y)) {
+						second.walk(4);
+						second.energy += Params.walk_energy_cost; // add back the energy it is subtracted later
+					}
+				}
+				second.energy -= Params.walk_energy_cost; // Subtract energy even if it cant walk
+			}
 
-			if (first.x_coord == second.x_coord && first.y_coord == second.y_coord){
-				// check if both alive
+			if (second.energy <= 0) {
+				board[second.x_coord][second.y_coord] = null;
+				collection.remove(second);
+				for (Critter critter : collection) {
+					if (critter.x_coord == second.x_coord && critter.y_coord == second.y_coord)
+						board[second.x_coord][second.y_coord] = critter.toString();
+				}
+			}
+
+
+
+			if (first.x_coord == second.x_coord && first.y_coord == second.y_coord && collection.contains(first) && collection.contains(second)) {
+
 				if (firstFight) {
 					firstRoll = getRandomInt(first.energy);
 				} else {
@@ -445,9 +527,15 @@ public abstract class Critter {
 				}
 
 				if (firstRoll >= secondRoll) {
-					// A wins
+					first.energy += second.energy / 2;
+					board[second.x_coord][second.y_coord] = first.toString();
+					collection.remove(second);
+
+
 				} else {
-					// B wins
+					second.energy += first.energy / 2;
+					board[first.x_coord][first.y_coord] = second.toString();
+					collection.remove(first);
 				}
 
 			}
@@ -458,8 +546,7 @@ public abstract class Critter {
 	}
 	
 	public static void displayWorld() {
-		// Complete this method.
-		//print top border
+		// Print top border
 		System.out.print("+");
 		for(int i = 0; i < Params.world_width; i++) {
 			System.out.print("-");
