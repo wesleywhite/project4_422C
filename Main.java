@@ -178,20 +178,26 @@ public class Main {
             }
 
             else if (command.equals("stats")) {
-                String className = myPackage + "." + split[1];
+                if (split.length == 2) {
+                    String className = myPackage + "." + split[1];
 
-                try {
-                    List<Critter> temp = Critter.getInstances(className);
-                    Class c = Class.forName(className);
-                    Object o = c.newInstance();
-                    String methodName = "runStats";
-                    Method runStats = o.getClass().getMethod(methodName, List.class);
-                    runStats.invoke(o, temp);
+                    try {
+                        List<Critter> temp = Critter.getInstances(className);
+                        Class c = Class.forName(className);
+                        Object o = c.newInstance();
+                        String methodName = "runStats";
+                        Method runStats = o.getClass().getMethod(methodName, List.class);
+                        runStats.invoke(o, temp);
 
-                } catch (Exception e) {
-                    System.out.println("error processing: " + input);
-                    continue;
+                    } catch (Exception e) {
+                        System.out.println("error processing: " + input);
+                        continue;
+                    }
                 }
+                else {
+                    invalid = true;
+                }
+
             }
 
             else {

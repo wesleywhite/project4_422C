@@ -56,6 +56,7 @@ public abstract class Critter {
 
 	
 	protected final void walk(int direction) {
+	    // CHECK FOR HAS MOVED HERE
 
 		this.energy -= Params.walk_energy_cost; // Deduct the walk energy cost
 		int oldX = x_coord;
@@ -110,7 +111,7 @@ public abstract class Critter {
 			case 2: y_coord = Math.floorMod(y_coord - steps, height);
 					break;
 			// left up
-			case 3: x_coord = (x_coord - steps) % width;
+			case 3: x_coord = Math.floorMod(x_coord - steps, width);
 					y_coord = Math.floorMod(y_coord - steps, height);
 					break;
 			// left
@@ -246,15 +247,37 @@ public abstract class Critter {
 	 */
 	static abstract class TestCritter extends Critter {
 		protected void setEnergy(int new_energy_value) {
-			super.energy = new_energy_value;
+            // need to kill the critter if set energy is below 0
+		    super.energy = new_energy_value;
+		    if (super.energy <= 0) {
+		        Critter.remove(this);
+            }
 		}
-		
+
 		protected void setX_coord(int new_x_coord) {
-			super.x_coord = new_x_coord;
+            // need to update the board on the set x and set y
+		    int oldX = super.x_coord, oldY = super.y_coord;
+		    board[oldX][oldY] = null;
+		    super.x_coord = new_x_coord;
+		    board[super.x_coord][super.y_coord] = this.toString();
+		    for (Critter critter : collection) {
+		        if (critter.x_coord == oldX && critter.y_coord == oldY) {
+		            board[oldX][oldY] = critter.toString();
+                }
+            }
 		}
-		
+
 		protected void setY_coord(int new_y_coord) {
-			super.y_coord = new_y_coord;
+            // need to update the board on the set x and set y
+            int oldX = super.x_coord, oldY = super.y_coord;
+            board[oldX][oldY] = null;
+            super.y_coord = new_y_coord;
+            board[super.x_coord][super.y_coord] = this.toString();
+            for (Critter critter : collection) {
+                if (critter.x_coord == oldX && critter.y_coord == oldY) {
+                    board[oldX][oldY] = critter.toString();
+                }
+            }
 		}
 		
 		protected int getX_coord() {
@@ -312,17 +335,25 @@ public abstract class Critter {
 		// 3. Do the fights. doEncounters();
 		doEncounters();
 		// Clear the hasMoved flag each time step
-		for (Critter crit : collection) {
-			crit.hasMoved = false;
+		for (Critter critter : collection) {
+            critter.hasMoved = false;
 		}
 
 		// 4. updateRestEnergy();
+		List<Critter> remove = new ArrayList<Critter>();
+
 		for(Critter critter : collection) {
             critter.energy -= Params.rest_energy_cost;
 			if (critter.energy <= 0) {
-				remove(critter);
+                remove.add(critter);
+                for (Critter crit : collection) {
+                    if (!crit.equals(critter) && crit.x_coord == critter.x_coord && crit.y_coord == critter.y_coord)
+                        board[crit.x_coord][crit.y_coord] = crit.toString();
+                }
 			}
 		}
+		collection.removeAll(remove);
+
 
 		// 5. Generate Algae genAlgae();
 		genAlgae();
